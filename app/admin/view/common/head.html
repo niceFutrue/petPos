@@ -1,0 +1,63 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>[title]</title>
+    <link rel="stylesheet" href="/static/css/pintuer-2.0.min.css">
+    <link rel="stylesheet" href="/static/css/fontawesome4.7.0.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script type="text/javascript" src="/static/js/jquery-3.5.1.js"></script>
+    <!-- 自定义外部文件 -->
+    <script type="text/javascript" src="/static/js/custom.js"></script>
+    <!-- 图片裁剪 photoCrop -->
+    <script src="/static/js/photoCrop.js"></script>
+    <style>
+        @-webkit-keyframes iconAnima { 0% { transform: rotate(45deg); } 100% { transform: rotate(135deg); } }
+        .icon_tab_transform .nav-arrow:after{transform: rotate(135deg);animation: iconAnima .2s;}
+        .menu_li .nav_menu_child{display: none;}
+
+        .nav-menu::-webkit-scrollbar,#mainContent::-webkit-scrollbar {width: 3px;}
+        .nav-menu::-webkit-scrollbar-thumb,#mainContent::-webkit-scrollbar-thumb {border-radius: 10px;-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);background: #bbb;}
+        .nav-menu::-webkit-scrollbar-track,#mainContent::-webkit-scrollbar-track {-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);border-radius: 10px;background: #EDEDED;}
+        #mainContent{overflow-x: hidden;overflow-y: auto;background: palegoldenrod;font-size: 15px;}
+
+        .setting{display: none;z-index: 3;}
+        .flex-item {font-size:13px;}
+        .setting_tab{line-height: 54px;}
+        .flex-item .head_bg_tab{background-color: rgba(0,0,0,.3)!important;font-size:13px;color:#fff;}
+        .flex-item .head_bg_tab:hover{background-color: rgba(0,0,0,.6)!important;}
+
+        .tbody{font-size:13px;}
+        .bg-overflow-hide {min-width: 120px;max-width: 180px;overflow-x: hidden;white-space: nowrap;text-overflow: ellipsis;}
+        .bg-img-bgcolor{background: rgba(0,0,0,.3);}
+        .bg-edit-img {max-width: 80px;max-height: 60px;}
+        .bg_file{width: 100%;height: 100%;padding: 10px;position: absolute;left: 0;top: 0;opacity: .2;cursor: pointer;}
+        .bg-preview{width:100%;padding:10px;}
+        .bg_img_box{display:inline-block;width:200px;min-height:60px;margin-right:10px;position: relative;background: rgba(0,0,0,.3);}
+        .btn-edit, .btn-del{cursor: pointer;}
+        /* 编辑遮罩 */
+        body::-webkit-scrollbar {width: 6px;}
+        body::-webkit-scrollbar-thumb {border-radius: 10px;-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);background: #bbb;}
+        body::-webkit-scrollbar-track {-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);border-radius: 10px;background: #fff;}
+        /* 新增、修改弹窗 */
+        .centerMag-mask-box, .form-mask-box{display:none;}
+        .centerMag-mask-bg, .form-mask-bg{width:100%;height: 100%;position: fixed;top: 0;left: 0;bottom: 0;z-index: 8;background:rgba(120,120,120,.86);}
+        .centerMag-mask-content, .form-mask-content{position: absolute;z-index: 33;top: 0;left: 50%;transform: translateX(-50%);transition:all .3s ease-out;}
+        .centerMag-content, .form-content{width: 680px;padding:20px 30px;margin:56px auto;background: #fff;border-radius: 18px;box-sizing: border-box;}
+        .centerMag-content-tle, .form-content-tle{font-size: 24px;font-weight: bold;text-align: center;margin: 0;}
+        .centerMag-close, .form-close{position: absolute;top: 30px;right:-60px;width:38px;height:38px;border-radius:8px;cursor: pointer;}
+        .centerMag-close:hover, .form-close:hover{box-shadow:#f0f0f0 0 0 8px;}
+        .centerMag-close:before, .form-close:before{width: 32px;height: 2px;background: #fff;position: absolute;top:19px;left:3px;content: "";transform: rotateZ(45deg);}
+        .centerMag-close:after, .form-close:after{width: 32px;height: 2px;background: #fff;position: absolute;top:19px;left:3px;content: "";transform: rotateZ(-45deg);}
+
+
+        /* 分页 */
+        .pagebar{text-align: center;}
+        .pagination li{display:inline-block;list-style: none;margin-right: 10px;}
+        .juppage .button{display:inline-block;font-size:14px;padding: 3px 6px;color:#227FFE;border: 1px solid #227FFE;border-radius:5px;cursor: pointer;transition: all 1s cubic-bezier(0.175,0.885,0.32,1) 0s;}
+        .prepage,.nextpage,.juppage{padding:3px 6px;cursor: pointer;line-height:18px;font-size:12px;}
+        .btnnum{width:40px;height:26px;line-height: 18px;font-size:13px;padding: 5px 8px;margin-right:8px;border:1px solid #ccc;border-radius:3px;outline: none;}
+        .btnnum:focus{border: 1px solid #227FFE;}
+        .prepage:hover,.nextpage:hover{color:#fff;background-color: #009688;}
+    </style>
+</head>

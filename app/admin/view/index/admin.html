@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+{include file="common/head" title="宠物定位_后台管理"/}
+<script>
+    /* 全局定义 分页 */
+    var curPage = 1;    //当前页数
+    var totalPage = 1;  //总页数
+    $("curpage").attr('active',true); //当前页 禁用
+    //上一页
+    function prepage(){
+        if(curPage == 1){
+            $(".prepage").attr('disabled',true);
+        }else{
+            $(".prepage").attr('disabled',false);
+            curPage = curPage - 1;
+            init(curPage);
+        }
+    }
+    //下一页
+    function nextpage(){
+        if(curPage == totalPage){
+            $(".nextpage").attr('disabled',true);
+        }else{
+            $(".nextpage").attr('disabled',false);
+            curPage = curPage+1;
+            init(curPage);
+        }
+    }
+    //页数跳转
+    function btnpage() {
+        var inp = $('.btnnum').val();
+        if(inp != curPage){
+            if(inp >= 1 && inp <= totalPage){
+                init(inp);
+            }else{
+                dialog("请输入正确的页数，"+inp+"的页数不存在！");
+                $('.btnnum').val('');
+            }
+        }
+        $('.btnnum').val('');
+    }
+    // 消息对话框
+    function dialog(msg){
+        $().dialog({
+            "target":{
+                "id":"dialoguntarget",
+                "title":"提示",
+                "text":msg,
+                "confirm":"确定",
+            },
+        });
+    }
+
+</script>
+<header class="bg-deep text-light">
+    <div class="flex flex-between">
+        <div class="flex-item padding margin-left">管理后台</div>
+        <div class="flex-item grid margin-right">
+            <a class="padding bg-deep head_bg_tab" href="/"><span class="fa-home margin-right-mini"></span>首页</a>
+            <div class="margin-left-mini relative">
+                <div class="flex-item bg-deep padding-left-big padding-right-big head_bg_tab setting_tab">
+                    <span class="padding-right-mini align-middle">{$userName}</span>
+                    <img class="radius-circle" style="width: 30px;height:30px;" src="/static/image/mark.png">
+                </div>
+                <div class="absolute w12 bg-deep setting head_bg_tab">
+                    <a class="padding block bg-deep head_bg_tab personalCenter" href="javascript:;"><span class="fa-user-circle margin-right-mini"></span>个人中心</a>
+                    <a class="padding block bg-deep head_bg_tab" href="javascript:;" onclick="clearRuntime()"><span class="fa-trash-o margin-right-mini"></span>清理缓存</a>
+                    <a class="padding block bg-deep head_bg_tab" href="javascript:;" onclick="logout()"><span class="fa-power-off margin-right-mini"></span>注销</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    // 个人中心
+    function personalCenter() {
+
+    }
+    // 清除缓存
+    function clearRuntime(){
+        $.ajax({
+            type: "POST",
+            url: "clearRuntime",
+            success: function (res) {
+                //console.log(res);
+                dialog(res.msg);
+                $(".setting").slideUp(500)
+            }
+        })
+    }
+    // 注销
+    function logout(){
+        location.href = "/admin/logout";
+    }
+    var petPermissionToken = localStorage.getItem("petPermissionToken"); // 定义全局存放token变量
+</script>
+<main class="flex" style="height: calc(100vh - 70px)">
+    <aside class="sidebar sidebar-hold border-right relative" id="sidebar-hold" style="width:180px;">
+        <!-- 菜单 按钮开关 -->
+        <ul class="nav nav-open nav-switch size-mini" data-sidebar='{"target":"#sidebar-hold","min":100,"max":180}'><li></li><li></li><li></li></ul>
+
+        <!-- 菜单logo -->
+        <a class="block align-center margin-top-small padding-bottom-small border-bottom" href="javascript:;">
+            <img class="w2" src="/static/image/common/max-logo.png">
+        </a>
+
+        <!-- 菜单栏 -->
+        <ul class="nav nav-icon nav-icon-text nav-menu nav-divider margin-top" style="height:calc(100vh - 130px);overflow-y:auto">
+            <li class="menu_li">
+                <a href="javascript:;"><span class="nav-media fa-wrench size-big"></span><span class="nav-arrow sidebar-hidden">设备管理</span></a>
+                <ul class="nav nav-icon nav_menu_child padding-left">
+                    <li><a href="#seoMag"><span class="nav-media icon-icon margin-right-small sidebar-hidden"></span>SEO</a></li>
+                    <li><a href="#"><span class="nav-media icon-icon margin-right-small sidebar-hidden"></span>设备</a></li>
+                </ul>
+            </li>
+            <li class="menu_li">
+                <a href="javascript:;"><span class="nav-media fa-user-o size-big"></span><span class="nav-arrow sidebar-hidden">用户管理</span></a>
+                <ul class="nav nav-icon nav_menu_child padding-left">
+                    <li><a href="#contentMag"><span class="nav-media icon-icon margin-right-small sidebar-hidden"></span>内容列表</a></li>
+                    <li><a href="#"><span class="nav-media icon-icon margin-right-small sidebar-hidden"></span>用户</a></li>
+                </ul>
+            </li>
+            <li class="menu_li">
+                <a href="javascript:;"><span class="nav-media fa-map-marker size-big"></span><span class="nav-arrow sidebar-hidden">定位管理</span></a>
+                <ul class="nav nav-icon nav_menu_child padding-left">
+                    <li><a href="#sourceMag"><span class="nav-media icon-icon margin-right-small sidebar-hidden"></span>管理</a></li>
+                    <li><a href="#"><span class="nav-media icon-icon margin-right-small sidebar-hidden"></span>定位轨迹</a></li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+    <section class="flex-grow" style="background:beige;">
+        <div class="padding-left-large padding-top-small padding-bottom-small bg-white">
+            <strong id="menu_tle" style="margin-left:12px;font-size: 15px;">文件管理</strong>
+        </div>
+        <div class="margin-small radius demo-sidebar-box" id="mainContent">
+            <!-- html -->
+        </div>
+    </section>
+    <div class="dialog" id="dialog"></div>
+</main>
+<div class="centerMag-mask-box">
+    <div class="centerMag-mask-bg"><!--遮罩背景--></div>
+    <div class="centerMag-mask-content">
+        <span class="centerMag-close"></span>
+        <form class="centerMag-content" id="" method="post" action="" enctype="multipart/form-data">
+            <p class="centerMag-content-tle">个人中心</p>
+            <div class="grid margin-bottom">
+                <input class="hidden" id="id" name="id">
+                <div class="input-group x12">
+                    <label class="input-required">账号：</label>
+                    <div class="input-block">
+                        <input class="input" id="magName" name="magName"
+                               data-validate='{"required":true,"length":">=3","invalid":"账号不可为空"}'/>
+                    </div>
+                </div>
+            </div>
+            <div class="grid margin-bottom">
+                <div class="input-group x12">
+                    <label>手机号：</label>
+                    <div class="input-block">
+                        <input class="input" id="magPhone" name="magPhone"/>
+                    </div>
+                </div>
+            </div>
+            <div class="grid margin-bottom">
+                <div class="input-group x12">
+                    <label>邮箱：</label>
+                    <div class="input-block">
+                        <div class="input-block">
+                            <input class="input" id="magEmail" name="magEmail"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid margin-bottom">
+                <div class="input-group x12">
+                    <label>密码：</label>
+                    <div class="input-block">
+                        <input class="input" id="magPassword" name="magPassword"/>
+                    </div>
+                </div>
+            </div>
+            <div class=" align-center">
+                <label></label>
+                <div class="input-block">
+                    <input class="button border-sub margin-right" type="submit" id="submit" value="提交">
+                    <button class="button border-main margin-right btn-reset" type="reset"><span>&#8635;</span> 重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    var hiframe = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    $("#mainContent").css("height",( hiframe - 136 )+"px");
+
+    // 菜单展开、收缩
+    $(".menu_li").on("click","a",function(){
+        var _that = $(this);
+        _that.next(".nav_menu_child").slideToggle(function () {
+            if($(this).is(":visible")){
+                _that.addClass("icon_tab_transform");
+            }else{
+                _that.removeClass("icon_tab_transform");
+            }
+        });
+    });
+    // 面包屑
+    $(".menu_li .nav_menu_child").on("click","li",function(e){
+        $(".nav_menu_child").children().removeClass('active');
+        $(this).addClass('active').siblings().removeClass('active');
+        let tle = $(this).text();
+        $("#menu_tle").html(tle);
+    });
+    // 个人中心、清除缓存，登出：显示与隐藏
+    $(".setting_tab").on("click",function () {
+        $(".setting").slideToggle(500);
+    });
+    //页面切换
+    function loadChange(){
+        var hash = location.hash.slice(1);
+        if(hash == '' || hash == null){
+            hash = $(".menu_li .nav_menu_child li").eq(0).addClass('active').children().attr("href").slice(1);
+        }
+        $.ajax({
+            type: 'POST',
+            url:"/admin/" + hash,
+            //headers: {"lenze-doc-token":lenzeProm},
+            success:function (res) {
+                $(".setting").slideUp(500);//关闭个人中心
+                $("#mainContent").html(res);
+            }
+        })
+    }
+    loadChange();
+    // 菜单切换
+    window.addEventListener('hashchange', function () {
+        loadChange();
+    });
+
+    // 个人中心 打开
+    $(".personalCenter").on("click",function () {
+        $(".setting").slideUp(500);
+        $(".centerMag-mask-box").fadeIn(500);
+        //console.log(localStorage.getItem("permissionToken"));
+    });
+    // 个人中心 关闭内容编辑
+    $(".centerMag-close, .centerMag-mask-bg").on("click",function () {
+        $(".centerMag-mask-box").fadeOut(500);
+    });
+</script>
+<script type="text/javascript" src="/static/js/pintuer-2.0.min.js"></script>
+</body>
+</html>

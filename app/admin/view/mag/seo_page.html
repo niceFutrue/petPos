@@ -1,0 +1,232 @@
+<div class="panel limit_width">
+    <div class="padding">
+        <div class="margin-bottom">
+            <button class="button border-dot btn-add"><span class="icon-add"></span> 添加内容</button>
+        </div>
+        <table class="table table-hover margin-bottom bg-white">
+            <tr class="bg-silver">
+                <th width="60">ID</th>
+                <th>rule</th>
+                <th>seo名称</th>
+                <th>关键词</th>
+                <th>发布时间</th>
+                <th>操作</th>
+            </tr>
+            <tbody class="tbody"><!--数据list--></tbody>
+        </table>
+        <div class="pagebar align-center margin-bottom bg-white"> <!--分页栏目--></div>
+        <div class="form-mask-box">
+            <div class="form-mask-bg"><!--遮罩背景--></div>
+            <div class="form-mask-content">
+                <span class="form-close"></span>
+                <form class="form-content" id="seoForm" method="post" action="seoApd" enctype="multipart/form-data">
+                    <p class="form-content-tle">标题</p>
+                    <div class="grid margin-bottom">
+                        <div class="hidden">
+                            <label>ID：</label>
+                            <div class="input-block">
+                                <input class="input" id="id" name="id" readonly/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <label class="input-required">rule：</label>
+                            <div class="input-block">
+                                <input class="input" id="rule" name="rule"
+                                       data-validate='{"required":true,"length":">=3","invalid":"请输入规则"}'/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <label>SEO名称：</label>
+                            <div class="input-block">
+                                <input class="input" id="name" name="name"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x9">
+                            <label class="input-required">标题：</label>
+                            <div class="input-block">
+                                <input class="input" id="tle" name="tle" placeholder="头部标题"
+                                       data-validate='{"required":true,"length":">=2","invalid":"请输入标题"}'/>
+                            </div>
+                        </div>
+                        <div class="input-group margin-left x2">
+                            <label>状态：</label>
+                            <div class="input-block">
+                                <select class="input" id="status" name="status">
+                                    <option value="1">显示</option>
+                                    <option value="0">隐藏</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <label class="input-required">关键字：</label>
+                            <div class="input-block">
+                        <textarea class="input" id="keywords" name="keywords" style="height:100px"
+                                  data-validate='{"required":true,"length":">=3","invalid":"请输入关键字"}'></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <label>描述：</label>
+                            <div class="input-block">
+                        <textarea class="input" id="description" name="description"
+                                  style="height:100px"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <label></label>
+                        <div class="input-block center">
+                            <button class="button border-sub margin-right" type="submit" id="submit">提交</button>
+                            <button class="button border-main margin-right" type="reset" id="reset">重置</button>
+                            <!--<a class="button border-dark" href="javascript:history.back(-1)">返回</a>-->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    init(1);
+    //ajax 获取数据
+    function init(page) {
+        $.ajax({
+            type: "POST",
+            url: "getData",
+            headers: {"petPermissionToken":petPermissionToken},
+            data: {'type': 'seo', 'page': page},
+            dataType: "json",
+            success: function (res) {
+                let ht = "", pg = "";
+                let data = res.data;
+                if (data != '') {
+                    for (let i in data) {
+                        ht += "<tr>\n" +
+                            "<td class='bg-num'>" + data[i].id + "</td>" +
+                            "<td class='bg-overflow-hide'>" + data[i].rule + "</td>" +
+                            "<td>" + data[i].name + "</td>" +
+                            "<td class='hidden'>" + data[i].title + "</td>" +
+                            "<td class='bg-overflow-hide'>" + data[i].keywords + "</td>" +
+                            "<td class='hidden'>" + data[i].description + "</td>" +
+                            "<td class='hidden'>" + data[i].status + "</td>" +
+                            "<td class='align-center'>" + data[i].release + "</td>" +
+                            "<td class='align-center'><div class='button-group'>" +
+                            "   <a class='button border-main btn-edit'> 修改</a>" +
+                            "   <a class='button border-danger btn-del'> 删除</a>" +
+                            "</div></td></tr>";
+                    }
+                    pg = " <ul class='pagination'>" +
+                        "<li class='prepage' onclick='prepage()'>上一页</li> " +
+                        "<li class='curpage'><span>" + res.current_page + "</span></li>" +
+                        "<li class='nextpage' onclick='nextpage()'>下一页</li> <span>共 <span class='lastpage'>" + res.last_page + "</span> 页，" + res.total + "条</span>" +
+                        "<li class='juppage'><input class='btnnum' type='text' data-validate=\"required:'请输入数字',number:'必须为数字'\"  /><div class='button border-main' onclick='btnpage()'>跳转</div></li>" +
+                        "</ul>";
+                    $(".tbody").html(ht);      //显示数据
+                    curPage = res.current_page;   //当前页数
+                    totalPage = res.last_page;    //总页数
+                    $(".pagebar").html(pg);
+                } else {
+                    dialog("请先添加数据！");
+                }
+            },
+            error: function () {
+                dialog("数据显示失败！");
+            }
+        })
+    }
+
+    //清空编辑框内容
+    function empty() {
+        $('#id').val('');
+        $('#rule').val('');
+        $('#name').val('');
+        $('#tle').val(''); //标题
+        $('#keywords').val(''); //关键词
+        $('#description').val(''); //描述
+        $("#status").val(1);
+    }
+
+    //新增/重置
+    $(".btn-add, #reset").click(function () {
+        empty();$("#submit").attr('disabled', false);
+        $(".form-mask-box").fadeIn(200);
+        $(".form-content-tle").html("数据新增");
+    });
+    //单个删除按钮
+    $('.tbody').on('click', '.btn-del', function () {
+        if (confirm("您确定要删除吗?")) {
+            let id = $(this).parents('tr').children().eq(0).text();
+            if (id != null && id !== "") {
+                $.ajax({
+                    url: 'delData',
+                    type: 'post',
+                    headers: {"petPermissionToken":petPermissionToken},
+                    data: {'id': id, 'type': 'seo'},
+                    success: function (res) {
+                        dialog(res.msg);
+                        init(curPage);
+                    },
+                });
+            } else {
+                dialog('该数据不存在！');
+            }
+        }
+    });
+    // 修改按钮
+    $('.tbody').on('click', '.btn-edit', function () {
+        $(".form-mask-box").fadeIn(200);$(".form-content-tle").html("数据修改");
+        let id, rule, name, tle, keywords, description, status;
+        id = $(this).parents('tr').children().eq(0).text();
+        rule = $(this).parents('tr').children().eq(1).text();
+        name = $(this).parents('tr').children().eq(2).text();
+        tle = $(this).parents('tr').children().eq(3).html();
+        keywords = $(this).parents('tr').children().eq(4).html();
+        description = $(this).parents('tr').children().eq(5).text();
+        status = $(this).parents('tr').children().eq(6).text();
+        //将值赋到 可编辑状态
+        $('#id').val(id);
+        $('#rule').val(rule);
+        $('#name').val(name);
+        $('#tle').val(tle);
+        $('#keywords').val(keywords);
+        $('#description').val(description);
+        $('#status').val(status);
+    });
+    // 关闭内容编辑
+    $(".form-close,.form-mask-bg").on("click",function () {
+        $(".form-mask-box").fadeOut(200);
+    });
+
+    //校验并提交
+    $('#seoForm').validate({
+        "valid": "通过校验",
+        "toggle": "#submit",
+        "confirm": {
+            "target": {
+                "id": "dialogconfirm",
+                "text": "确认提交表单？",
+                "confirm": "确认",
+                "cancel": "取消",
+            },
+            "dismiss": false
+        },
+        "async": true,
+        "success": function (res) {
+            dialog(res.msg);
+            empty();
+            init(curPage);
+            $("#submit").attr('disabled', false);
+        }
+    });
+
+</script>

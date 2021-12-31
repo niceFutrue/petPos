@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+{include file="common/head" title="管理后台_登录"/}
+<style>
+    body {margin: 0;overflow: hidden;background: aliceblue;}
+    body:before {
+        background-image: linear-gradient(45deg, rgba(30,30,30,.06) 25%, transparent 50%), linear-gradient(-45deg, rgba(30,30,30,.08) 25%, transparent 50%);
+        background-size: 39px 39px;background-position: 50%;background-repeat: space;
+        content: '';position: fixed;top: 0;left: 0;right: 0;bottom: 0;z-index: -520;pointer-events: none;
+    }
+    .vertical_horizontal{position: absolute;top:50%;left:50%;transform: translate(-50%,-50%)}
+    .login_box{min-width:360px;padding:20px 30px;background-color:lavender;opacity: 0.86;border-radius:6px;}
+    .login_tle{font-size:26px;font-weight:bold;}
+    .go_register,.login_switch{color:#005980;cursor:pointer;}
+    .go_register:hover,.login_switch:hover{color:#009fda;}
+    .form-login-password{display: block}
+    .form-login-code{display: none}
+    @media (max-width:540px){.login_box{width:300px;padding:12px 20px;} }
+    .boxShadow{box-shadow: 0 0 16px #bbb;border-radius: 8px;}
+    #getSmsCode{position:absolute;top:-1px;right:0;display:inline-block;font-size: 12px;padding:10px 16px;background-color:aliceblue;text-align: center;}
+    .code_click{color:#0ae;cursor: pointer;}
+    .error{color:#e33;margin-top:5px;}
+    .input-sub{display: block;width: 100%;border: 0;outline: 0;padding:9px 0;color:#fff;background-color:#bbb;}
+    .login-row-between{display: flex;justify-content: space-between;align-items: end;}
+</style>
+<body>
+<div class="container">
+    <div class="vertical_horizontal">
+        <div class="boxShadow" >
+            <div class="login_box">
+                <div class="margin-bottom login-row-between">
+                    <span class="login_tle">登录</span>
+                    <div class="flex-center">没有账号？<span class="go_register">去注册！</span></div>
+                </div>
+                <form class="form-login-password" id="form-login-password" action="login" method="post">
+                    <div class="input-group padding-bottom-mini">
+                        <div class="input-block" style="height: 63px">
+                            <input type="text" class="input bg-white" name="username" placeholder="手机/邮箱/账号名称" data-validate='{"required":true,"length":">=3","invalid":"请输入账号"}' />
+                        </div>
+                    </div>
+                    <div class="input-group padding-bottom-mini">
+                        <div class="input-block" style="height: 63px">
+                            <input type="password" class="input bg-white password" name="password" placeholder="登录密码" data-validate='{"required":true,"length":">=3","invalid":"请输入密码"}' />
+                        </div>
+                    </div>
+                    <div class="input-group margin-bottom align-right">
+                        <span class="login_switch login_code">短信验证登录</span>
+                    </div>
+                    <div class="input-group margin-bottom">
+                        <input class="button button-block bg-main radius-big" id="loginSub" type="submit" value="登录"/>
+                    </div>
+                </form>
+                <form class="form-login-code" id="form-login-code" action="loginMobileCode" method="post">
+                    <div class="input-group padding-bottom-mini">
+                        <div class="input-block" style="height: 63px">
+                            <input class="input-phone input bg-white" name="mobile" id="mobile" onkeyup="value=value.replace(/[^\d]/g,'')" maxlength="11" placeholder="手机" data-validate='{"required":true,"mobile":true,"ajax":{"url":"/admin/checkMobile","data":"mobile"},"invalid":"请输入手机号"}'/>
+                        </div>
+                        <span class="error er-phone"></span>
+                    </div>
+                    <div class="input-group padding-bottom-mini">
+                        <div class="input-block" style="height: 63px">
+                            <input class="input-vcode input bg-white" name="inputSmsCode" maxlength="6" placeholder="请输入6位数验证码" data-validate='{"required":true,"number":true,"length":"==6","ajax":{"url":"/admin/checkSmsCode","data":"mobile"},"invalid":"验证码有误"}' disabled/>
+                            <input class="button" id="getSmsCode" name="getSmsCode" type="button" value="手机验证码" disabled/>
+                        </div>
+                    </div>
+                    <div class="input-group margin-bottom align-right">
+                        <span class="login_switch login_password">账号密码登录</span>
+                    </div>
+                    <div class="input-group margin-bottom">
+                        <input class="radius-big input-sub" id="loginCodeSub" type="submit" value="登录" disabled />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 页面校验码输入框 -->
+<div class="dialog" id="smsdialog">
+    <form id="dialog-verify" class="dialog-body dialog-content">
+        <div class="dialog-text">
+            <input class="hidden pageCode" name="pageCode" />
+            <p>请输入验证码<br /><span class="size-large text-main" id="pageCode">123456</span></p>
+            <div class="input-group">
+                <div class="input-block" align="center">
+                    <div class="input-verify" data-form="verify">
+                        <input type="text" id="verify" name="inputPageCode" maxlength="6" class="input" data-validate='{"required":true,"ajax":{"url":"/admin/checkPageCode","data":"pageCode"},"invalid":"请输入验证码"}' />
+                        <ul><li></li><li></li><li></li><li></li><li></li><li></li></ul>
+                    </div>
+                </div>
+            </div>
+            <div data-confirm="dialog" class="hidden">确定</div>
+        </div>
+        <div data-cancel="dialog" class="dialog-confirm">关闭</div>
+    </form>
+</div>
+<script type="text/javascript" src="/static/js/pintuer-2.0.min.js"></script>
+<script>
+    // 没有账号？去注册
+    $(".go_register").on('click',function () {
+        location.href = "/admin/registerPage";
+    });
+    // 手机验证登录
+    $(".login_code").on("click",function () {
+        $(".form-login-code").show();
+        $(".form-login-password").hide();
+    });
+    // 账号密码登录
+    $(".login_password").on("click",function () {
+        $(".form-login-code").hide();
+        $(".form-login-password").show();
+    });
+
+    // 1、账号密码形式提交
+    $("#form-login-password").validate({
+        "valid":"通过校验",
+        "toggle":"#loginSub",
+        "confirm":{
+            "target":{"id":"dialog","text":"确认提交？","confirm":"提交","cancel":"取消",'block':true},
+            "dismiss":false
+        },
+        "async":true,
+        "success":function(res){
+            //console.log(res);
+            if(res.code == 200){
+                localStorage.setItem("petPermissionToken", res.token);
+                location.href = res.url;
+            }else if(res.code == 402){
+                $(".password").val("");
+                dialog(res.msg);
+            }else{
+                $(".input").val("");
+                dialog(res.msg);
+            }
+            $("#loginSub").attr('disabled',false);
+        }
+    });
+    // 2、手机验证形式提交
+    $("#form-login-code").validate({
+        "valid":"通过校验",
+        "toggle":"#loginCodeSub",
+        "confirm":{
+            "target":{"id":"dialog","text":"确认提交？","confirm":"提交","cancel":"取消",'block':true},
+            "dismiss":false
+        },
+        "ajax_mobile":function(data){
+            //console.log(data)
+            if(data['error'] == 0){
+                // 手机框_验证 => 页面验证码
+                $("#pageCode").text(data.pageCode);
+                $(".pageCode").val(data.pageCode);
+                $('#getSmsCode').addClass('code_click').attr("disabled",false).css("background","beige");
+            }else{
+                $('#getSmsCode').removeClass('code_click').attr("disabled",true).css("background","aliceblue");//手机验证失败，禁止手机验证码按钮
+            }
+        },
+        "async":1,
+        "success":function(res){
+            // 登录提交_数据返回
+            //console.log(res);
+            if(res["code"] === 200){
+                localStorage.setItem("petPermissionToken", res['token']);
+                location.href = res['url'];
+            }else{
+                $("#mobile").val("");
+                dialog(res.msg);
+            }
+            $("#loginCodeSub").attr('disabled',true);
+        }
+    });
+    // 短信发送验证码
+    $("#getSmsCode").button({
+        // "validate":{
+        //     "data":"#mobile",
+        //     "attr":{"text":"手机有误","class":"button","disabled":true}
+        // },
+        "confirm":{
+            "dialog":{"target":"#smsdialog","dismiss":false},
+            "function":function(){
+                $('#dialog-verify').validate({
+                    "ajax_verify":function(data){
+                        // 页面验证码_校验
+                        if(data["error"] === 0){
+                            $("#smsdialog").find('[data-confirm="dialog"]').trigger("click");
+                            //触发验证框
+                            //$("#smsdialog").find('[data-form="verify"]').trigger("click");
+                        }
+                    }
+                });
+            }
+        },
+        "ajax":{
+            "url":"/admin/codeSms",
+            "data":"#mobile",
+            "attr":{"text":"正在发送","class":"button border-main","disabled":true},
+            "function":function(data){
+                if(data["code"] === 200){
+                    $('.input-vcode').attr("disabled",false);
+                    // 短信验证码_本地测试弹窗获取 code
+                    var textTle="请输入验证码，15分钟有效期。<br /><span class=\"size-large\">"+data["vCode"]+"</span>";
+                    $().dialog({
+                        "target":{"id":"codevalue","text":textTle,"close":true},
+                        "dismiss":false
+                    });
+                } else if(data["code"] === 2000){
+                    var textTle= data["msg"]+"<br /><span class=\"size-large\">"+data["vCode"]+"</span>";
+                    $().dialog({
+                        "target":{"id":"codevalue","text":textTle,"close":true},
+                        "dismiss":false
+                    });
+                }else{
+                    $().dialog({
+                        "target":{"id":"codevalue","text":data["msg"],"close":true},
+                        "dismiss":false
+                    });
+                }
+            }
+        },
+        "timer":{
+            "attr":{"text":"开始倒计时","class":"button bg-danger","disabled":true},
+            "second":120,
+            "text":"#s# 秒倒计时",
+            "function":function(data){
+                //console.log(data);
+                //倒计时结束后，放开发送按钮
+                $("#getSmsCode").removeClass("bg-danger").attr("disabled",false).val("重新发送");
+            },
+        },
+    });
+    // 监听短信验证码长度 =》 解除登录按钮
+    $('.input-vcode').bind('input propertychange',function () {
+        if($(this).val().length === 6){
+            $('.input-sub').css('background-color','#0ae').attr("disabled",false);
+        }else{
+            $('.input-sub').css('background-color','#ccc').attr("disabled",true);
+        }
+    });
+
+    // 提示框
+    function dialog(msg) {
+        $().dialog({
+            "target":{
+                "id":"dialog_center_top",
+                "text": msg,
+                "confirm":"确定"
+            },
+            "show":"fixed-top-center",
+            "style":"margin-top",
+        });
+    }
+</script>
+</body>
+</html>

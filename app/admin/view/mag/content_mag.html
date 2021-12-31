@@ -1,0 +1,251 @@
+<div class="panel limit_width">
+    <div class="padding">
+        <div class="margin-bottom">
+            <button class="button border-dot btn-add"><span class="icon-add"></span> 添加内容</button>
+        </div>
+        <table class="table table-hover align-center margin-bottom bg-white">
+            <tr class="bg-silver">
+                <th width="60">ID</th>
+                <th>标题</th>
+                <th>来源</th>
+                <th>更新时间</th>
+                <th>操作</th>
+            </tr>
+            <tbody class="tbody"></tbody>
+        </table>
+        <div class="pagebar align-center margin-bottom bg-white"></div>
+        <div class="form-mask-box">
+            <div class="form-mask-bg"><!--遮罩背景--></div>
+            <div class="form-mask-content">
+                <span class="form-close"></span>
+                <form class="form-content" id="contentMag" method="post" action="contentApd" enctype="multipart/form-data">
+                    <p class="form-content-tle">标题</p>
+                    <div class="grid margin-bottom">
+                        <input class="hidden" id="id" name="id">
+                        <input class="hidden" id="rssSourceName" name="rssSourceName">
+                        <div class="input-group x12">
+                            <label class="input-required">标题：</label>
+                            <div class="input-block">
+                                <input class="input" id="rssName" name="rssName"
+                                       data-validate='{"required":true,"length":">=3","invalid":"请输入标题"}'/>
+                            </div>
+                        </div>
+                        <div class="hidden">
+                            <label>URL：</label>
+                            <div class="input-block">
+                                <input class="input" id="rssLink" name="rssLink" readonly/>
+                            </div>
+                        </div>
+                        <div class="hidden">
+                            <label>日期：</label>
+                            <div class="input-block">
+                                <input class="input" id="rssDate" name="rssDate" readonly/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x9">
+                            <label>关键词：</label>
+                            <div class="input-block">
+                                <input class="input" id="rssKeywords" name="rssKeywords"/>
+                            </div>
+                        </div>
+                        <div class="input-group margin-left x2">
+                            <label>状态：</label>
+                            <div class="input-block">
+                                <select class="input" id="status" name="status">
+                                    <option value="1">显示</option>
+                                    <option value="0">隐藏</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <div><label>图片链接（可不填）：</label></div>
+                            <div class="input-block">
+                                <input class="input" id="rssSrc" name="rssSrc"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <label>描述：</label>
+                            <div class="input-block">
+                                <textarea class="input" id="rssDescription" name="rssDescription" style="height:80px"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid margin-bottom">
+                        <div class="input-group x12">
+                            <label>内容：</label>
+                            <div class="input-block">
+                                <textarea class="input" id="rssContent" name="rssContent"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" align-center">
+                        <label></label>
+                        <div class="input-block">
+                            <input class="button border-sub margin-right" type="submit" id="submit" value="提交">
+                            <button class="button border-main margin-right btn-reset" type="reset"><span>&#8635;</span> 重置</button>
+                            <!--<a class="button border-dark" href="javascript:history.back(-1)">返回</a>-->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/tinymce/tinymce.min.js"></script>
+<script type="text/javascript">
+    /* 编辑器 */
+    tinymce.init({
+        selector: '#rssContent',
+        height: 280,
+        plugins: 'print preview searchreplace autolink directionality visualblocks visualchars fullscreen image link media template code codesample table charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount imagetools textpattern paste emoticons autosave autoresize',
+        toolbar: 'code undo redo | forecolor backcolor bold italic link | alignleft aligncenter alignright indent2em lineheight | bullist numlist | image bdmap | fullscreen ',
+        autosave_ask_before_unload: false,
+        language: 'zh_CN',//注意大小写
+    });
+
+    init(1);
+    //ajax 获取数据
+    function init(page) {
+        $.ajax({
+            type: "POST",
+            url: "rssGet",
+            headers: {"petPermissionToken":petPermissionToken},
+            data: {'type': 'info', 'page': page},
+            dataType: "json",
+            success: function (res) {
+                let ht = "", pg = "";
+                let data = res.data;
+                if (data != '') {
+                    for (let i in data) {
+                        ht += " <tr>\n" +
+                            "<td>" + data[i].id + "</td>\n" +
+                            "<td class='hidden'>" + data[i].img_src + "</td>" +
+                            "<td class='bg-overflow-hide'>" + data[i].title + "</td>\n" +
+                            "<td>" + data[i].source_name + "</td>\n" +
+                            "<td class='hidden'>" + data[i].keywords + "</td>\n" +
+                            "<td class='hidden'>" + data[i].description + "</td>\n" +
+                            "<td class='hidden'>" + data[i].content + "</td>\n" +
+                            "<td class='hidden'>" + data[i].link + "</td>\n" +
+                            "<td class='hidden'>" + data[i].status + "</td>\n" +
+                            "<td class='bg-overflow-hide'>" + data[i].updated + "</td>\n" +
+                            "<td><div class='button-group'>\n" +
+                            "   <a class='button border-main btn-edit'>修改</a>\n" +
+                            "   <a class='button border-danger btn-del'>删除</a> </div>\n" +
+                            "</td></tr>";
+                    }
+                    pg = " <ul class='pagination'>" +
+                        "<li class='prepage' onclick='prepage()'>上一页</li> " +
+                        "<li class='curpage'><span>" + res.current_page + "</span></li>" +
+                        "<li class='nextpage' onclick='nextpage()'>下一页</li> <span>共 <span class='lastpage'>" + res.last_page + "</span> 页，" + res.total + "条</span>" +
+                        "<li class='juppage'><input class='btnnum' type='text' data-validate=\"required:'请输入数字',number:'必须为数字'\"  /><div class='button border-main' onclick='btnpage()'>跳转</div></li>" +
+                        "</ul>";
+                    $(".tbody").html(ht);      //显示数据
+                    curPage = res.current_page;   //当前页数
+                    totalPage = res.last_page;    //总页数
+                    $(".pagebar").html(pg);
+                } else {
+                    dialog("请先添加数据！");
+                }
+            },
+            error: function () {
+                dialog("数据显示失败！");
+            }
+        })
+    }
+
+    //清空编辑框内容
+    function empty() {
+        $('#id').val('');
+        $('#rssName').val('');
+        $('#rssSourceName').val('');
+        $('#rssLink').val('');
+        $('#rssDate').val('');
+        $('#rssKeywords').val('');
+        $('#rssDescription').val('');
+        $('#rssContent').val('');
+        $('#rssSrc').val('');
+        $('#status').val(1);
+        tinyMCE.editors[0].setContent('');
+    }
+
+    //新增与重置
+    $('.btn-add,.btn-reset').click(function () {
+        empty();
+        $("#submit").attr('disabled', false);
+        $(".form-mask-box").fadeIn(200);
+        $(".form-content-tle").html("数据新增");
+    });
+    //删除按钮
+    $('.tbody').on('click', '.btn-del', function () {
+        if (confirm("您确定要删除吗?")) {
+            let hid = $(this).parents('tr').children().eq(0).text();
+            if (hid != null && hid != "") {
+                $.ajax({
+                    url: 'rssDel',
+                    type: 'post',
+                    data: {'id': hid, 'type': 'info'},
+                    success: function (res) {
+                        dialog(res.msg);
+                        init(curPage);
+                    },
+                });
+            }
+        }
+    });
+    // 关闭内容编辑
+    $(".form-close,.form-mask-bg").on("click",function () {
+        $(".form-mask-box").fadeOut(200);
+    });
+    //编辑按钮
+    $('.tbody').on('click', '.btn-edit', function () {
+        $(".form-mask-box").fadeIn(200);$(".form-content-tle").html("数据修改");
+        let id, oldImg, name, sourceName, keywords, description, content, link, status, date;
+        id = $(this).parents('tr').children().eq(0).text();
+        oldImg = $(this).parents('tr').children().eq(1).text();
+        name = $(this).parents('tr').children().eq(2).text();
+        sourceName = $(this).parents('tr').children(3).eq(1).text();
+        keywords = $(this).parents('tr').children().eq(4).text();
+        description = $(this).parents('tr').children().eq(5).text();
+        content = $(this).parents('tr').children().eq(6).html();
+        link = $(this).parent().parent().parent().children().eq(7).text();
+        status = $(this).parents('tr').children().eq(8).text();
+        date = $(this).parents('tr').children().eq(9).text();
+        $('#id').val(id);
+        $('#rssName').val(name);
+        $('#rssSourceName').val(sourceName);
+        $('#rssKeywords').val(keywords);
+        $('#rssDescription').val(description);
+        tinyMCE.editors[0].setContent(content);
+        $('#rssLink').val(link);
+        $('#status').val(status);
+        $('#rssDate').val(date);
+        $("#rssSrc").val(oldImg); //img 路径赋值到 input 中
+    });
+    //提交验证
+    $('#contentMag').validate({
+        "valid": "通过校验",
+        "toggle": "#submit",
+        "confirm": {
+            "target": {
+                "id": "dialogconfirm",
+                "text": "确认提交表单？",
+                "confirm": "确认",
+                "cancel": "取消",
+            },
+            "dismiss": false
+        },
+        "async": true,
+        "success": function (res) {
+            dialog(res.msg);
+            empty();
+            init(curPage);
+            $("#submit").attr('disabled', false);
+        }
+    });
+</script>
